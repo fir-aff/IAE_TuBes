@@ -7,7 +7,7 @@ const Booking = sequelize.define('Booking', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  flightScheduleId: {
+  flightCode: {
     type: DataTypes.STRING,
     allowNull: false
   },

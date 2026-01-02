@@ -1,11 +1,11 @@
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
+  process.env.DB_NAME || 'membership_db', // Tambahkan Default
+  process.env.DB_USER || 'user',          // Tambahkan Default
+  process.env.DB_PASS || 'pass',          // Tambahkan Default
   {
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST || 'membership-db', // Penting: Default ke nama host docker
     dialect: 'postgres',
     logging: false,
   }
@@ -14,12 +14,14 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`✅ Connected to PostgreSQL: ${process.env.DB_NAME}`);
-    // Sync tabel otomatis (Sesuai spesifikasi modular) [cite: 5]
+    // Gunakan nama DB dari config sequelize agar akurat
+    console.log(`✅ Membership Service: Terhubung ke PostgreSQL (${sequelize.config.database})`);
+    
+    // Sync tabel otomatis
     await sequelize.sync({ alter: true });
   } catch (err) {
     console.error('❌ DB Connection Error:', err.message);
-    process.exit(1);
+    // process.exit(1); // <-- DISARANKAN DI-KOMENTARI (Biar container gak mati saat nunggu DB siap)
   }
 };
 

@@ -10,12 +10,15 @@ const typeDefs = gql`
   type Booking @key(fields: "id") {
     id: ID!
     status: String
-    flightScheduleId: String
+    flightCode: String
     passengerName: String
   }
 
   extend type Mutation {
-    createBooking(flightScheduleId: String!, passengerName: String!): Booking
+    createBooking(flightCode: String!, passengerName: String!): Booking
+    
+    # TAMBAHKAN INI: Mutasi untuk update status
+    updateBookingStatus(id: ID!, status: String!): Booking
   }
   
   extend type Query {
@@ -25,20 +28,25 @@ const typeDefs = gql`
 
 const resolvers = {
   Mutation: {
-    createBooking: async (_, { flightScheduleId, passengerName }, context) => {
-      // 1. CEK AUTH: Apakah user login?
-      if (!context.userId) {
-        throw new Error("Anda harus login untuk melakukan booking!");
-      }
+    createBooking: async (_, { flightCode, passengerName }, context) => {
+      // ... (kode createBooking yang lama biarkan saja) ...
+      if (!context.userId) throw new Error("Anda harus login!");
+      return await Booking.create({ userId: context.userId, flightCode, passengerName });
+    },
 
-      // 2. CREATE (Simpan ke DB)
-      const newBooking = await Booking.create({
-        userId: context.userId,
-        flightScheduleId,
-        passengerName
-      });
+    // TAMBAHKAN INI:
+    updateBookingStatus: async (_, { id, status }, context) => {
+      // Validasi sederhana
+      if (!context.userId) throw new Error("Unauthorized");
 
-      return newBooking;
+      const booking = await Booking.findByPk(id);
+      if (!booking) throw new Error("Booking tidak ditemukan");
+
+      // Update status
+      booking.status = status;
+      await booking.save();
+      
+      return booking;
     }
   },
   Query: {
