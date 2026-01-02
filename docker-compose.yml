@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # --- 1. GATEWAY ---
   graphql-gateway:
     build: ./graphql-gateway
     ports:
@@ -14,6 +15,7 @@ services:
       - payment-service
       - promo-service
 
+  # --- 2. MEMBERSHIP SERVICE & DB ---
   membership-service:
     build: ./membership-service
     ports:
@@ -36,7 +38,10 @@ services:
       - POSTGRES_DB=membership_db
     networks:
       - travel-network
+    volumes:                    # <--- DATA AMAN DI SINI
+      - membership_data:/var/lib/postgresql/data
 
+  # --- 3. HOTEL SERVICE & DB ---
   hotel-service:
     build: ./hotel-service
     ports:
@@ -52,7 +57,10 @@ services:
     image: mongo:6
     networks:
       - travel-network
+    volumes:                    # <--- DATA AMAN DI SINI
+      - hotel_data:/data/db
 
+  # --- 4. BOOKING SERVICE & DB ---
   booking-service:
     build: ./booking-service
     ports:
@@ -75,7 +83,10 @@ services:
       - POSTGRES_DB=booking_db
     networks:
       - travel-network
+    volumes:                    # <--- DATA AMAN DI SINI
+      - booking_data:/var/lib/postgresql/data
 
+  # --- 5. PAYMENT SERVICE & DB ---
   payment-service:
     build: ./payment-service
     ports:
@@ -98,7 +109,10 @@ services:
       - POSTGRES_DB=payment_db
     networks:
       - travel-network
+    volumes:                    # <--- DATA AMAN DI SINI
+      - payment_data:/var/lib/postgresql/data
 
+  # --- 6. PROMO SERVICE & DB ---
   promo-service:
     build: ./promo-service
     ports:
@@ -121,7 +135,17 @@ services:
       - POSTGRES_DB=promo_db
     networks:
       - travel-network
+    volumes:                    # <--- DATA AMAN DI SINI
+      - promo_data:/var/lib/postgresql/data
 
 networks:
   travel-network:
     driver: bridge
+
+# DAFTAR SEMUA VOLUME PENYIMPANAN
+volumes:
+  membership_data:
+  hotel_data:
+  booking_data:
+  payment_data:
+  promo_data:
