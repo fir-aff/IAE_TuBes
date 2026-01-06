@@ -10,7 +10,7 @@ const GET_MY_BOOKINGS = gql`
       flightCode
       passengerName
       status
-      createdAt
+      # createdAt
     }
   }
 `;
@@ -19,6 +19,16 @@ const GET_MY_BOOKINGS = gql`
 const CREATE_BOOKING = gql`
   mutation CreateBooking($flightCode: String!, $passengerName: String!) {
     createBooking(flightCode: $flightCode, passengerName: $passengerName) {
+      id
+      status
+    }
+  }
+`;
+
+// 3. MUTATION: Bayar Tiket
+const PAY_BOOKING = gql`
+  mutation PayBooking($bookingId: String!, $amount: Int!, $method: String!) {
+    payBooking(bookingId: $bookingId, amount: $amount, method: $method) {
       id
       status
     }
@@ -36,7 +46,10 @@ export default function MemberDashboard() {
   }
 
   // Hook untuk mengambil data booking (Load otomatis saat halaman dibuka)
-  const { data, loading, error, refetch } = useQuery(GET_MY_BOOKINGS);
+ const { data, loading, error, refetch } = useQuery(GET_MY_BOOKINGS, {
+    pollInterval: 500,
+    fetchPolicy: "network-only" 
+  });
 
   // Hook untuk create booking
   const [createBooking, { loading: creating }] = useMutation(CREATE_BOOKING, {
@@ -67,6 +80,37 @@ export default function MemberDashboard() {
         passengerName: formData.passengerName 
       } 
     });
+  };
+
+  const [payBooking, { loading: paying }] = useMutation(PAY_BOOKING, {
+    onCompleted: () => {
+      alert("Payment Successful! 💸");
+      
+      // KITA KASIH JEDA 0.5 DETIK SEBELUM REFRESH DATA
+      setTimeout(() => {
+        refetch(); 
+      }, 500); 
+    },
+    onError: (err) => {
+      alert("Payment Failed: " + err.message);
+    }
+  });
+
+  // Fungsi yang dipanggil saat tombol Pay Now diklik
+  const handlePay = (id) => {
+    // Data Dummy (Sesuai Postman kamu)
+    const amount = 1500000;
+    const method = "OVO";
+
+    if (window.confirm(`Pay Rp 1.500.000 via OVO for Ticket ID: ${id}?`)) {
+      payBooking({ 
+        variables: { 
+          bookingId: id,   // <-- Variabel 1
+          amount: amount,  // <-- Variabel 2 (WAJIB ADA)
+          method: method   // <-- Variabel 3 (WAJIB ADA)
+        } 
+      });
+    }
   };
 
   return (
@@ -169,8 +213,12 @@ export default function MemberDashboard() {
                   </span>
                   
                   {booking.status === 'BOOKED' && (
-                    <button className="block mt-2 text-sm text-secondary font-bold hover:underline">
-                      Pay Now
+                    <button 
+                      onClick={() => handlePay(booking.id)}
+                      disabled={paying}
+                      className="block mt-2 text-sm text-secondary font-bold hover:underline disabled:opacity-50"
+                    >
+                      {paying ? "Paying..." : "Pay Now"}
                     </button>
                   )}
                 </div>
