@@ -36,9 +36,12 @@ export default function Hotels() {
           </div>
           
           <nav className="hidden md:flex gap-8">
-            <button onClick={() => navigate('/home')} className="text-sm font-semibold text-blue-600">Home</button>
-            <button onClick={() => navigate('/dashboard')} className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Dashboard</button>
-            <button onClick={() => navigate('/dashboard')} className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">History</button>
+            <button onClick={() => navigate('/home')} className="text-blue-600 font-bold border-b-2 border-blue-600">Home</button>
+            <button onClick={() => navigate('/dashboard')} className="text-slate-500 hover:text-blue-600 font-medium">Dashboard</button>
+            <button onClick={() => navigate('/history')} className="text-slate-500 hover:text-blue-600 font-medium">History</button>
+            <button onClick={() => navigate('/wallet')} className="text-slate-500 hover:text-blue-600 font-medium">Wallet</button>
+            <button onClick={() => navigate('/promos')} className="text-slate-500 hover:text-blue-600 font-medium">Promos</button>
+            <button onClick={() => navigate('/profile')} className="text-slate-500 hover:text-blue-600 font-medium">Profile</button>
           </nav>
 
           <div className="flex items-center gap-4">

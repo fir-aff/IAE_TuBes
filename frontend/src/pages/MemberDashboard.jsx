@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useLazyQuery, gql } from '@apollo/client';
 
-// 1. UPDATE QUERY: Ambil hotelName dan type
+// QUERY DATA
 const GET_MY_BOOKINGS = gql`
   query GetMyBookings {
     myBookings {
       id
       flightCode
-      hotelName      # <--- BARU
-      type           # <--- BARU
+      hotelName
+      type
       passengerName
       status
     }
@@ -34,11 +34,22 @@ const CREATE_BOOKING = gql`
   }
 `;
 
+// MUTASI BAYAR BIASA (Update Status)
 const PAY_BOOKING = gql`
   mutation PayBooking($bookingId: String!, $amount: Int!, $method: String!) {
     payBooking(bookingId: $bookingId, amount: $amount, method: $method) {
       id
       status
+    }
+  }
+`;
+
+// --- BARU: MUTASI POTONG WALLET ---
+const PAY_WITH_WALLET = gql`
+  mutation PayWithWallet($amount: Int!) {
+    payWithWallet(amount: $amount) {
+      id
+      balance
     }
   }
 `;
@@ -75,12 +86,15 @@ export default function MemberDashboard() {
     onError: (err) => alert(err.message)
   });
 
+  // Setup Mutasi Wallet
+  const [payWithWallet] = useMutation(PAY_WITH_WALLET);
+
   const [payBooking] = useMutation(PAY_BOOKING, {
     onCompleted: () => {
-      alert("✅ Pembayaran Berhasil! Status PAID.");
+      alert("✅ Pembayaran Berhasil! Tiket Lunas.");
       refetch();
     },
-    onError: (err) => alert("Gagal Bayar: " + err.message)
+    onError: (err) => alert("Gagal Update Status: " + err.message)
   });
 
   const handleLogout = () => {
@@ -99,25 +113,34 @@ export default function MemberDashboard() {
     checkPromo({ variables: { code: promoCodeInput } });
   };
 
-  const handlePay = (booking) => {
-    // LOGIKA HARGA:
-    // Kalau Hotel, kita anggap harganya standard dulu (misal 1jt) atau hardcode
-    // Kalau Pesawat, 1.5jt.
-    // (Di real app, harga harusnya disimpan di database Booking saat create)
-    
+  // --- LOGIKA PEMBAYARAN PINTAR ---
+  const handlePay = async (booking) => {
     let basePrice = 1500000; 
-    if (booking.type === 'HOTEL') basePrice = 750000; // Contoh harga rata-rata hotel
+    if (booking.type === 'HOTEL') basePrice = 750000;
 
     const finalPrice = basePrice - activeDiscount;
 
-    if (window.confirm(`Bayar Booking ID ${booking.id}?\n\nItem: ${booking.type === 'HOTEL' ? booking.hotelName : booking.flightCode}\nHarga: Rp ${basePrice.toLocaleString()}\nDiskon: -Rp ${activeDiscount.toLocaleString()}\n--------------------------\nTOTAL: Rp ${finalPrice.toLocaleString()}`)) {
-      payBooking({ 
-        variables: { 
-          bookingId: booking.id, 
-          amount: finalPrice, 
-          method: "OVO" 
-        } 
-      });
+    if (window.confirm(`Bayar Booking ID ${booking.id}?\n\nItem: ${booking.type === 'HOTEL' ? booking.hotelName : booking.flightCode}\nTotal: Rp ${finalPrice.toLocaleString()}\nMetode: Wallet Balance`)) {
+      
+      try {
+        // 1. Potong Saldo dulu (ke Membership Service)
+        await payWithWallet({
+          variables: { amount: finalPrice }
+        });
+
+        // 2. Kalau saldo cukup, update status Booking (ke Payment/Booking Service)
+        await payBooking({ 
+          variables: { 
+            bookingId: booking.id, 
+            amount: finalPrice, 
+            method: "WALLET" 
+          } 
+        });
+
+      } catch (error) {
+        // Kalau saldo kurang, error muncul disini
+        alert("❌ Transaksi Gagal: " + error.message);
+      }
     }
   };
 
@@ -139,6 +162,9 @@ export default function MemberDashboard() {
           </div>
           <div onClick={() => navigate('/hotels')} className="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer transition-all">
             <span className="material-symbols-outlined">hotel</span> Hotels
+          </div>
+          <div onClick={() => navigate('/wallet')} className="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer transition-all">
+            <span className="material-symbols-outlined">wallet</span> Wallet
           </div>
           <button onClick={handleLogout} className="p-3 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg font-semibold flex items-center gap-3 text-left w-full mt-auto">
             <span className="material-symbols-outlined">logout</span> Logout
@@ -188,28 +214,32 @@ export default function MemberDashboard() {
         </div>
 
         {/* LIST BOOKING */}
-        <h3 className="text-xl font-bold mb-4 text-slate-800">Riwayat Perjalanan</h3>
+        <div className="flex justify-between items-center mb-4 max-w-4xl">
+          <h3 className="text-xl font-bold text-slate-800">Riwayat Perjalanan</h3>
+          <button 
+            onClick={() => navigate('/history')} 
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+          >
+            View All <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </div>
+        
         <div className="grid gap-4 max-w-4xl">
-          {data && data.myBookings.map((booking) => (
+          {data && data.myBookings.slice(0, 3).map((booking) => (
             <div key={booking.id} className="bg-white p-5 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-4">
-                
-                {/* LOGIKA IKON & JUDUL */}
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center ${booking.type === 'HOTEL' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
                   <span className="material-symbols-outlined">
                     {booking.type === 'HOTEL' ? 'hotel' : 'airplane_ticket'}
                   </span>
                 </div>
-                
                 <div>
                   <h4 className="font-bold text-lg text-slate-800">
-                    {/* Kalau Hotel, tampilkan Nama Hotel. Kalau Flight, tampilkan Kode Flight */}
                     {booking.type === 'HOTEL' ? booking.hotelName : booking.flightCode}
                   </h4>
                   <p className="text-slate-500 text-sm">{booking.passengerName}</p>
                   <p className="text-xs text-slate-400">ID: {booking.id} • {booking.type}</p>
                 </div>
-
               </div>
               
               <div className="text-right">

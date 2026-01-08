@@ -6,6 +6,10 @@ import HomePage from './pages/HomePage';
 import MemberDashboard from './pages/MemberDashboard';
 import Hotels from './pages/Hotels';
 import HotelDetail from './pages/HotelDetail';
+import HistoryPage from './pages/HistoryPage'; 
+import ProfilePage from './pages/ProfilePage';
+import WalletPage from './pages/WalletPage';
+import PromoPage from './pages/PromoPage';
 
 function App() {
   return (
@@ -21,8 +25,12 @@ function App() {
       {/* Halaman User yang sudah login */}
       <Route path="/home" element={<HomePage />} />
       <Route path="/dashboard" element={<MemberDashboard />} />
+      <Route path="/history" element={<HistoryPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/hotels" element={<Hotels />} />
       <Route path="/hotels/:id" element={<HotelDetail />} />
+      <Route path="/wallet" element={<WalletPage />} />
+      <Route path="/promos" element={<PromoPage />} />
     </Routes>
   );
 }

@@ -14,6 +14,10 @@ const typeDefs = gql`
   }
 
   extend type Query {
+    # TAMBAHAN: Untuk menampilkan list promo di halaman PromoPage frontend
+    promos: [Promo]
+    
+    # Query lama (untuk validasi saat checkout)
     checkPromo(code: String!): Promo
   }
 
@@ -24,8 +28,14 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
+    // RESOLVER BARU: Ambil semua promo
+    promos: async () => {
+      // Ambil semua promo yang statusnya ACTIVE
+      return await Promo.findAll({ where: { status: 'ACTIVE' } });
+    },
+
     checkPromo: async (_, { code }) => {
-      // Cari promo berdasarkan Kode (Case insensitive)
+      // Cari promo berdasarkan Kode
       const promo = await Promo.findOne({ where: { code } });
       if (!promo) throw new Error("Kode Promo tidak valid!");
       if (promo.status !== 'ACTIVE') throw new Error("Kode Promo sudah tidak aktif!");
@@ -34,7 +44,17 @@ const resolvers = {
   },
   Mutation: {
     createPromo: async (_, { code, discount }) => {
-      return await Promo.create({ code, discount });
+      return await Promo.create({ 
+        code, 
+        discount,
+        status: 'ACTIVE' // Default status active
+      });
+    }
+  },
+  // Reference Resolver (Wajib jika pakai Federation)
+  Promo: {
+    __resolveReference(ref) {
+      return Promo.findOne({ where: { code: ref.code } });
     }
   }
 };

@@ -81,6 +81,9 @@ export default function Hotels() {
           <div className="p-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer">
             <span className="material-symbols-outlined">hotel</span> Hotels
           </div>
+          <div onClick={() => navigate('/wallet')} className="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer transition-all">
+            <span className="material-symbols-outlined">wallet</span> Wallet
+          </div>
           <button onClick={handleLogout} className="p-3 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg font-semibold flex items-center gap-3 text-left w-full mt-auto">
             <span className="material-symbols-outlined">logout</span> Logout
           </button>
