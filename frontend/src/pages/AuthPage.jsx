@@ -48,7 +48,7 @@ export default function AuthPage() {
       // Saat Login Sukses:
       localStorage.setItem('token', data.login.token); // Simpan token
       alert("Login Success! Redirecting...");
-      navigate('/dashboard'); // Pindah ke dashboard
+      navigate('/home'); // Pindah ke dashboard
     },
     onError: (err) => {
       alert("Login Failed: " + err.message);

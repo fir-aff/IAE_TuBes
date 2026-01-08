@@ -72,6 +72,9 @@ export default function Hotels() {
           TravelApp
         </div>
         <nav className="flex flex-col gap-2">
+          <div onClick={() => navigate('/home')} className="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer transition-all">
+            <span className="material-symbols-outlined">home</span> Home
+          </div>
           <div onClick={() => navigate('/dashboard')} className="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer transition-all">
             <span className="material-symbols-outlined">dashboard</span> Dashboard
           </div>
@@ -117,12 +120,11 @@ export default function Hotels() {
                   
                   {/* TOMBOL BOOKING */}
                   <button 
-                    onClick={() => handleBook(hotel.name)}
-                    disabled={booking}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                  >
-                    {booking ? "Booking..." : "Book Room"}
-                  </button>
+                    onClick={() => navigate(`/hotels/${hotel.id}`)} 
+                    className="bg-white border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-50 transition-colors"
+                    >
+                    View Details
+                    </button>
 
                 </div>
               </div>

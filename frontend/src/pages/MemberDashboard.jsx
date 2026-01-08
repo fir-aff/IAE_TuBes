@@ -131,6 +131,9 @@ export default function MemberDashboard() {
           TravelApp
         </div>
         <nav className="flex flex-col gap-2">
+          <div onClick={() => navigate('/home')} className="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer transition-all">
+            <span className="material-symbols-outlined">home</span> Home
+          </div>
           <div className="p-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-3 cursor-pointer">
             <span className="material-symbols-outlined">dashboard</span> Dashboard
           </div>
