@@ -1,15 +1,25 @@
-// booking-service/models/Booking.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../db');
 
 const Booking = sequelize.define('Booking', {
-  userId: { // Kunci asing ke User (tapi kita simpan ID saja karena microservice)
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  flightCode: {
+  userId: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  // Tipe Booking: 'FLIGHT' atau 'HOTEL'
+  type: {
+    type: DataTypes.STRING,
+    defaultValue: 'FLIGHT' 
+  },
+  // Kalau Pesawat, isi ini:
+  flightCode: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  // Kalau Hotel, isi ini (KOLOM BARU):
+  hotelName: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
   passengerName: {
     type: DataTypes.STRING,
@@ -17,7 +27,7 @@ const Booking = sequelize.define('Booking', {
   },
   status: {
     type: DataTypes.STRING,
-    defaultValue: 'BOOKED'
+    defaultValue: 'BOOKED' // BOOKED, PAID, CANCELLED
   }
 });
 

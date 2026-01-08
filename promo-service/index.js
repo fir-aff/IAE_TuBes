@@ -1,16 +1,16 @@
 const { ApolloServer, gql } = require('apollo-server');
 const { buildSubgraphSchema } = require('@apollo/subgraph');
 const { connectDB } = require('./db');
+const Promo = require('./models/Promo');
 
 connectDB();
 
 const typeDefs = gql`
-  type Promo {
+  type Promo @key(fields: "code") {
     id: ID!
-    code: String!
-    discountAmount: Float
-    minTransaction: Float
-    isValid: Boolean
+    code: String
+    discount: Int
+    status: String
   }
 
   extend type Query {
@@ -18,22 +18,24 @@ const typeDefs = gql`
   }
 
   extend type Mutation {
-    createPromo(code: String!, discount: Float!): Promo
+    createPromo(code: String!, discount: Int!): Promo
   }
 `;
 
 const resolvers = {
   Query: {
-    checkPromo: (_, { code }) => {
-      // Mock logic: Jika kode "LIBURAN", valid.
-      if (code === "LIBURAN") {
-        return { id: "pr1", code, discountAmount: 50000, minTransaction: 100000, isValid: true };
-      }
-      return { id: "null", code, discountAmount: 0, minTransaction: 0, isValid: false };
+    checkPromo: async (_, { code }) => {
+      // Cari promo berdasarkan Kode (Case insensitive)
+      const promo = await Promo.findOne({ where: { code } });
+      if (!promo) throw new Error("Kode Promo tidak valid!");
+      if (promo.status !== 'ACTIVE') throw new Error("Kode Promo sudah tidak aktif!");
+      return promo;
     }
   },
   Mutation: {
-    createPromo: (_, args) => ({ id: "new", ...args, isValid: true })
+    createPromo: async (_, { code, discount }) => {
+      return await Promo.create({ code, discount });
+    }
   }
 };
 
