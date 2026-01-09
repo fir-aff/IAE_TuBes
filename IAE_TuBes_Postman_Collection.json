@@ -1,0 +1,360 @@
+{
+  "info": {
+    "name": "IAE_TuBes - GraphQL API Collection",
+    "description": "Complete GraphQL API collection for IAE_TuBes System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "iae-tubes"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Membership Service",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Register($username: String!, $email: String!, $password: String!) {\n  register(\n    username: $username\n    email: $email\n    password: $password\n  ) {\n    id\n    username\n    email\n    role\n  }\n}",
+                "variables": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.login) {",
+                  "    pm.environment.set(\"token\", jsonData.data.login.token);",
+                  "    pm.environment.set(\"user_id\", jsonData.data.login.user.id);",
+                  "    console.log(\"Token saved:\", jsonData.data.login.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Login($username: String!, $password: String!) {\n  login(username: $username, password: $password) {\n    token\n    user {\n      id\n      username\n      email\n    }\n  }\n}",
+                "variables": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Booking Service",
+      "item": [
+        {
+          "name": "Create Booking (FLIGHT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateBooking($type: String, $flightCode: String, $hotelName: String, $passengerName: String!) {\n  createBooking(\n    type: $type\n    flightCode: $flightCode\n    hotelName: $hotelName\n    passengerName: $passengerName\n  ) {\n    id\n    type\n    flightCode\n    hotelName\n    passengerName\n    status\n  }\n}",
+                "variables": "{\n  \"type\": \"FLIGHT\",\n  \"flightCode\": \"JMK001\",\n  \"passengerName\": \"John Doe\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            },
+            "description": "Create flight booking (will validate flight schedule from Kelompok 1)"
+          }
+        },
+        {
+          "name": "Create Booking (HOTEL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateBooking($type: String, $flightCode: String, $hotelName: String, $passengerName: String!) {\n  createBooking(\n    type: $type\n    flightCode: $flightCode\n    hotelName: $hotelName\n    passengerName: $passengerName\n  ) {\n    id\n    type\n    flightCode\n    hotelName\n    passengerName\n    status\n  }\n}",
+                "variables": "{\n  \"type\": \"HOTEL\",\n  \"hotelName\": \"Grand Hotel\",\n  \"passengerName\": \"John Doe\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            },
+            "description": "Create hotel booking"
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n  myBookings {\n    id\n    type\n    flightCode\n    hotelName\n    passengerName\n    status\n    createdAt\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking By ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetBookingById($id: ID!) {\n  bookingById(id: $id) {\n    id\n    type\n    flightCode\n    hotelName\n    passengerName\n    status\n  }\n}",
+                "variables": "{\n  \"id\": \"1\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            },
+            "description": "Get booking by ID (no auth required for integration)"
+          }
+        },
+        {
+          "name": "Update Booking Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation UpdateBookingStatus($id: ID!, $status: String!) {\n  updateBookingStatus(id: $id, status: $status) {\n    id\n    status\n  }\n}",
+                "variables": "{\n  \"id\": \"1\",\n  \"status\": \"CANCELLED\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Integrasi dengan Kelompok 1",
+      "item": [
+        {
+          "name": "Get Flight Schedule dari Kelompok 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetKelompok1FlightSchedule($flightCode: String!) {\n  kelompok1FlightSchedule(flightCode: $flightCode) {\n    id\n    flightCode\n    departureLocation\n    destinationLocation\n    departureTime\n    arrivalTime\n    price\n    availableSeats\n    status\n  }\n}",
+                "variables": "{\n  \"flightCode\": \"JMK001\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            },
+            "description": "Get flight schedule from Kelompok 1 (TUBES js v2)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Payment Service",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreatePayment($bookingId: String!, $amount: Float!, $paymentMethod: String!) {\n  createPayment(\n    bookingId: $bookingId\n    amount: $amount\n    paymentMethod: $paymentMethod\n  ) {\n    id\n    bookingId\n    amount\n    status\n    paymentMethod\n  }\n}",
+                "variables": "{\n  \"bookingId\": \"1\",\n  \"amount\": 500000,\n  \"paymentMethod\": \"CREDIT_CARD\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Promo Service",
+      "item": [
+        {
+          "name": "Get Promos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n  promos {\n    id\n    code\n    discount\n    validUntil\n    active\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

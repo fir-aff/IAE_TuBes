@@ -1,0 +1,304 @@
+# GraphQL Queries untuk Postman & GraphQL Playground - Kelompok 2
+# Copy-paste query ini langsung ke Postman atau GraphQL Playground
+
+# ============================================
+# 1. MEMBERSHIP SERVICE
+# ============================================
+
+# Register User
+mutation RegisterUser {
+  register(
+    username: "testuser"
+    email: "test@example.com"
+    password: "password123"
+  ) {
+    id
+    username
+    email
+    role
+  }
+}
+
+# Login (Simpan token untuk request berikutnya!)
+mutation Login {
+  login(username: "testuser", password: "password123") {
+    token
+    user {
+      id
+      username
+      email
+    }
+  }
+}
+
+# ============================================
+# 2. BOOKING SERVICE
+# ============================================
+
+# Create Booking (FLIGHT)
+# Headers: Authorization: Bearer <token>
+# Catatan: Akan otomatis memvalidasi flight schedule dari Kelompok 1
+mutation CreateFlightBooking {
+  createBooking(
+    type: "FLIGHT"
+    flightCode: "JMK001"
+    passengerName: "John Doe"
+  ) {
+    id
+    type
+    flightCode
+    passengerName
+    status
+  }
+}
+
+# Create Booking (HOTEL)
+# Headers: Authorization: Bearer <token>
+mutation CreateHotelBooking {
+  createBooking(
+    type: "HOTEL"
+    hotelName: "Grand Hotel"
+    passengerName: "John Doe"
+  ) {
+    id
+    type
+    hotelName
+    passengerName
+    status
+  }
+}
+
+# Get My Bookings
+# Headers: Authorization: Bearer <token>
+query GetMyBookings {
+  myBookings {
+    id
+    type
+    flightCode
+    hotelName
+    passengerName
+    status
+    createdAt
+  }
+}
+
+# Get Booking By ID
+# Catatan: Query ini dapat diakses tanpa auth untuk integrasi lintas kelompok
+query GetBookingById {
+  bookingById(id: "1") {
+    id
+    type
+    flightCode
+    hotelName
+    passengerName
+    status
+  }
+}
+
+# Update Booking Status
+# Headers: Authorization: Bearer <token>
+mutation UpdateBookingStatus {
+  updateBookingStatus(id: "1", status: "CANCELLED") {
+    id
+    status
+  }
+}
+
+# ============================================
+# 3. INTEGRASI DENGAN KELOMPOK 1
+# ============================================
+
+# Get Flight Schedule dari Kelompok 1
+# Headers: Authorization: Bearer <token>
+# Prasyarat: Kelompok 1 harus running
+query GetKelompok1FlightSchedule {
+  kelompok1FlightSchedule(flightCode: "JMK001") {
+    id
+    flightCode
+    departureLocation
+    destinationLocation
+    departureTime
+    arrivalTime
+    price
+    availableSeats
+    status
+  }
+}
+
+# ============================================
+# 4. PAYMENT SERVICE
+# ============================================
+
+# Create Payment
+# Headers: Authorization: Bearer <token>
+mutation CreatePayment {
+  createPayment(
+    bookingId: "1"
+    amount: 500000
+    paymentMethod: "CREDIT_CARD"
+  ) {
+    id
+    bookingId
+    amount
+    status
+    paymentMethod
+  }
+}
+
+# Get Payments
+# Headers: Authorization: Bearer <token>
+query GetPayments {
+  payments {
+    id
+    bookingId
+    amount
+    status
+    paymentMethod
+  }
+}
+
+# ============================================
+# 5. PROMO SERVICE
+# ============================================
+
+# Get Promos
+query GetPromos {
+  promos {
+    id
+    code
+    discount
+    validUntil
+    active
+  }
+}
+
+# Get Promo By Code
+query GetPromoByCode {
+  promoByCode(code: "DISCOUNT10") {
+    id
+    code
+    discount
+    validUntil
+    active
+  }
+}
+
+# ============================================
+# COMPLETE FLOW EXAMPLE
+# ============================================
+
+# Step 1: Register
+mutation Step1_Register {
+  register(
+    username: "testuser"
+    email: "test@example.com"
+    password: "password123"
+  ) {
+    id
+    username
+  }
+}
+
+# Step 2: Login (Simpan token!)
+mutation Step2_Login {
+  login(username: "testuser", password: "password123") {
+    token
+    user {
+      id
+    }
+  }
+}
+
+# Step 3: Query Flight Schedule dari Kelompok 1
+# Headers: Authorization: Bearer <token>
+# Prasyarat: Kelompok 1 harus running dan flight schedule sudah dibuat
+query Step3_GetFlightSchedule {
+  kelompok1FlightSchedule(flightCode: "JMK001") {
+    id
+    flightCode
+    departureLocation
+    destinationLocation
+    price
+    availableSeats
+    status
+  }
+}
+
+# Step 4: Create Booking dengan Validasi
+# Headers: Authorization: Bearer <token>
+# Catatan: Akan otomatis memvalidasi flight schedule dari Kelompok 1
+mutation Step4_CreateBooking {
+  createBooking(
+    type: "FLIGHT"
+    flightCode: "JMK001"
+    passengerName: "Test User"
+  ) {
+    id
+    type
+    flightCode
+    passengerName
+    status
+  }
+}
+
+# Step 5: Get My Bookings
+# Headers: Authorization: Bearer <token>
+query Step5_GetMyBookings {
+  myBookings {
+    id
+    type
+    flightCode
+    passengerName
+    status
+  }
+}
+
+# ============================================
+# QUERY DENGAN VARIABLES (Untuk Postman)
+# ============================================
+
+# Contoh: Create Booking dengan Variables
+# Variables:
+# {
+#   "type": "FLIGHT",
+#   "flightCode": "JMK001",
+#   "passengerName": "John Doe"
+# }
+mutation CreateBookingWithVariables(
+  $type: String
+  $flightCode: String
+  $hotelName: String
+  $passengerName: String!
+) {
+  createBooking(
+    type: $type
+    flightCode: $flightCode
+    hotelName: $hotelName
+    passengerName: $passengerName
+  ) {
+    id
+    type
+    flightCode
+    hotelName
+    passengerName
+    status
+  }
+}
+
+# Contoh: Get Flight Schedule dengan Variables
+# Variables:
+# {
+#   "flightCode": "JMK001"
+# }
+query GetFlightScheduleWithVariables($flightCode: String!) {
+  kelompok1FlightSchedule(flightCode: $flightCode) {
+    id
+    flightCode
+    departureLocation
+    destinationLocation
+    price
+    availableSeats
+    status
+  }
+}
+

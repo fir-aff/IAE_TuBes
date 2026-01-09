@@ -70,6 +70,7 @@ services:
       - DB_NAME=booking_db
       - DB_USER=user
       - DB_PASS=pass
+      - KELOMPOK1_FLIGHT_SCHEDULE_SERVICE=http://host.docker.internal:4002
     networks:
       - travel-network
     depends_on:

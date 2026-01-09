@@ -57,7 +57,7 @@ export default function Hotels() {
       <div className="relative w-full bg-slate-900">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1571003123894-1a37b8189071?auto=format&fit=crop&w=1600&q=80" 
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0zasBcJHD4eimGEn4CK4HuawUgav3Qdup7pFU3Tqf6dWDfccEHqLWQBl2FwpLXMX0y9pxv2vxtDTZc_X61OgLlRs8NC9JDhB8-KF9Oyye50J1Q4nGZlOCqxgxIgNeF8BiUKR_N-4NjNX4EbN41O7HUYEJ8FGhRWf9xZMeZokpyUUVEM2saY6gSF0Cp3oplG3ZNphWkYcGPPM43-_UJ80BAeBP99HA4kA-Ul7yDBMTbd2QasbYXYQ5ZBUQTq0MhtzFyDK5fY4Il8w" 
             alt="Background" 
             className="h-full w-full object-cover opacity-50"
           />
